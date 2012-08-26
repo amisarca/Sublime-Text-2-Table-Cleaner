@@ -33,7 +33,7 @@ Go to your Sublime Text 2 `Packages` directory and clone the package repository 
 * Copy the folder to your Sublime Text 2 `Packages` directory
 
 ## How it works
-Select the table you want to clean, and press **ALT + ;** and the table gets cleaned instantly.
+Select the table you want to clean, and press *alt + ;* and the table gets cleaned instantly.
 
 ## Contributing
 Did you spot any bug or think of a great improvement? Create a new issue, or submit a pull request.
