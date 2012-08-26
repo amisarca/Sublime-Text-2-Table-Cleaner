@@ -2,8 +2,7 @@
 
 ## What it does?
 
-Aligns and cleans the tables for a prettier output Useful for programming
-languages like Cucumber or LaTex.
+Aligns and cleans the tables for a prettier output Useful for programming languages like Cucumber or LaTex.
 
 ## Before
 
