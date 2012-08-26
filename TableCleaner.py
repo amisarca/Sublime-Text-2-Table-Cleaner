@@ -74,8 +74,3 @@ class TableCleanerCommand(sublime_plugin.TextCommand):
 
                 self.view.insert(edit, left_point,  " " * left_dif)
                 self.view.insert(edit, right_point, " " * right_dif)
-
-
-
-
-
