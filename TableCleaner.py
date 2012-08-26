@@ -3,25 +3,30 @@ import re, os, sys
 
 class TableCleanerCommand(sublime_plugin.TextCommand):
     def run(self, edit):
-        delimiters =  self.view.settings().get('table_cleaner_delimiters')
+        # Get the array of delimiters from the settings file
+        delimiters = self.view.settings().get('table_cleaner_delimiters')
 
+        # Get the positions of the delimiter characters
         positions = self.get_separators_positions(self.selected_lines(), delimiters)
 
+        # If the positions array is not empty (i.e. there was at least one
+        # delimiter character found) then perform the alignment
         if positions:
             self.align(positions, edit)
 
-    # Get the string containing the line
+    # Return a string containing the line given as parameter
     def get_line(self, line_num):
         return self.view.substr(self.view.full_line(self.view.text_point(line_num, 0)))
 
-    # Get an array containing the selected lines
+    # Return an array containing the selected lines
     def selected_lines(self):
         view = self.view
         sel = view.sel()
         line_nums = [view.rowcol(line.a)[0] for line in view.lines(sel[0])]
         return [(line, self.get_line(line)) for line in line_nums]
 
-    # Find the positions of the separators
+    # Return an array containing the line numbers and an array containg the
+    # column numbers of the delimiters
     def get_separators_positions(self, lines, separators):
         res = []
         for line in lines:
