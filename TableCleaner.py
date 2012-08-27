@@ -1,3 +1,5 @@
+# Author: Andrei Misarca
+
 import sublime, sublime_plugin
 import re, os, sys
 
@@ -114,13 +116,18 @@ class TableCleanerCommand(sublime_plugin.TextCommand):
                 diff = max_len - len(cell)
 
                 if self.align_to_middle:
+                    # Determine the number of characters that need to be inserted
+                    # to left and to right
                     l_diff = diff / 2
                     r_diff = diff - l_diff
 
+                    # If the current column is the first column, do not insert
+                    # the delimiters white spaces to the left
                     if col == 0:
                         cell = (l_diff * " ") + cell + (" " * r_diff) + \
                             (self.delimiters_white_spaces * " ")
 
+                        # If the column only contains a whitespace, then remove it
                         if cell == " ":
                             cell = ""
                     else:
