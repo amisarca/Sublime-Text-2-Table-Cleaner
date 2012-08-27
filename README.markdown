@@ -45,4 +45,5 @@ Select the table you want to clean, and press *alt + ;* and the table gets clean
 Did you spot any bug or think of a great improvement? Create a new issue, or submit a pull request.
 
 # Changelog
+- 0.1.0 Added better support for LaTex tables; added more settings to make it more configurable
 - 0.0.1 Initial release
