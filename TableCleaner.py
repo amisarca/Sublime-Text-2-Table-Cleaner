@@ -3,16 +3,71 @@ import re, os, sys
 
 class TableCleanerCommand(sublime_plugin.TextCommand):
     def run(self, edit):
-        # Get the array of delimiters from the settings file
-        delimiters = self.view.settings().get('table_cleaner_delimiters')
+        self.get_settings()
 
-        # Get the positions of the delimiter characters
-        positions = self.get_separators_positions(self.selected_lines(), delimiters)
+        lines, separator = self.get_separator(self.selected_lines())
+        lines, front_whites = self.front_whitespaces(lines)
 
-        # If the positions array is not empty (i.e. there was at least one
-        # delimiter character found) then perform the alignment
-        if positions:
-            self.align(positions, edit)
+        self.align(edit, lines, separator, front_whites)
+
+    # Retrieve all the settings from the settings file and store them in
+    # instance variables
+    def get_settings(self):
+        self.separators = self.view.settings() \
+            .get('table_cleaner_delimiters', ['|', '&'])
+        self.align_to_middle = self.view.settings() \
+            .get('table_cleaner_align_to_middle', False)
+        self.delimiters_white_spaces = self.view.settings() \
+            .get('table_cleaner_delimiters_white_spaces', 1)
+
+    # Replace the line with the index line_num with string
+    def replace_line(self, edit, line_num, string):
+        region = self.view.full_line(self.view.text_point(line_num, 0))
+        self.view.replace(edit, region, string)
+
+    # Trim the left whitespaces from each line, and retrieve the whitespace
+    # characters that appear at the beginning of each line
+    def front_whitespaces(self, lines):
+        # The number of whitespaces at the beginning of the lines, it is set to
+        # a very high value
+        front_indent_size = 120
+        front_whites = ""
+
+        for line in lines:
+            # Get the stripped version of the line, and find how many whitespaces
+            # there are at the beginning of the line
+            stripped_line = line[1].lstrip()
+            front_whites_size = len(line[1]) - len(stripped_line)
+
+            # Find the length of the shortest whitespace, and store that whitespace
+            if front_indent_size > front_whites_size:
+                front_indent_size = front_whites_size
+                front_whites = line[1][0:front_whites_size]
+
+            # The line gets stripped
+            line[1] = stripped_line
+
+        return lines, front_whites
+
+    # Find the separator for the selected table, and delete from the lines set
+    # the lines that do not contain the separator
+    def get_separator(self, lines):
+        separator = None
+
+        for line in lines[:]:
+            separator_found = False
+
+            for sep in self.separators:
+                if sep in line[1]:
+                    separator_found = True
+
+                    if separator == None:
+                        separator = sep
+
+            if not separator_found:
+                lines.remove(line)
+
+        return lines, separator
 
     # Return a string containing the line given as parameter
     def get_line(self, line_num):
@@ -23,59 +78,65 @@ class TableCleanerCommand(sublime_plugin.TextCommand):
         view = self.view
         sel = view.sel()
         line_nums = [view.rowcol(line.a)[0] for line in view.lines(sel[0])]
-        return [(line, self.get_line(line)) for line in line_nums]
+        return [[line, self.get_line(line)] for line in line_nums]
 
-    # Return an array containing the line numbers and an array containg the
-    # column numbers of the delimiters
-    def get_separators_positions(self, lines, separators):
-        res = []
+    # Split the lines by a separator
+    def split_lines(self, lines, separator):
         for line in lines:
-            s = line[1]
-            positions = [x for x in xrange(0, len(s)) if s[x] in separators]
-            if positions:
-                res.append((line[0], positions))
+            line[1] = line[1].split(separator)
 
-        return res
+        return lines
+
+    # Replace the old lines with the new ones, containing the cleaned table
+    def render_lines(self, edit, lines, separator, front_whites):
+        for line in lines:
+            new_line = front_whites + separator.join(line[1]) + "\n"
+            self.replace_line(edit, line[0], new_line)
 
     # Perform the alignment
-    def align(self, positions, edit):
-        # Get the number of columns and rows
-        cols_num = min([len(line[1]) for line in positions])
-        rows_num = len(positions)
+    def align(self, edit, lines, separator, front_whites):
+        lines = self.split_lines(lines, separator)
 
-        # Get the array of the line numbers where changes are performed
-        lines = [x[0] for x in positions]
+        # Find the sizes of the table
+        rows_size = len(lines)
+        cols_size = min([len(line[1]) for line in lines])
 
-        # How much has each row been shifted
-        cols_shift = [0] * rows_num
+        for col in xrange(0, cols_size):
+            max_len = 0
 
-        # Arange the table starting from the first column until the last one
-        for i in xrange(1, cols_num):
+            # Find the largest cell on the current column
+            for row in xrange(0, rows_size):
+                max_len = max(max_len, len(lines[row][1][col].strip()))
 
-            # Get the previous cols and update them with the shifts made so far
-            prev_cols = [x[1][i-1] for x in positions]
-            cols = [x[1][i] for x in positions]
+            for row in xrange(0, rows_size):
+                cell = lines[row][1][col].strip()
 
-            # Get the cols and add to each element the shifts made so far
-            cols = [i+j for i, j in zip(cols, cols_shift)]
-            prev_cols = [i+j for i, j in zip(prev_cols, cols_shift)]
+                diff = max_len - len(cell)
 
-            max_col = max(cols)
+                if self.align_to_middle:
+                    l_diff = diff / 2
+                    r_diff = diff - l_diff
 
-            for j in xrange(0, rows_num):
-                # Find how many characters must be inserted to the current cell
-                difference = max_col - cols[j]
+                    if col == 0:
+                        cell = (l_diff * " ") + cell + (" " * r_diff) + \
+                            (self.delimiters_white_spaces * " ")
 
-                # Add the current shift to the array of shifts
-                cols_shift[j] += difference
+                        if cell == " ":
+                            cell = ""
+                    else:
+                        cell = (self.delimiters_white_spaces * " ") + \
+                            (l_diff * " ") + cell + (" " * r_diff) + \
+                            (self.delimiters_white_spaces * " ")
 
-                left_dif  = difference / 2
-                right_dif = difference - left_dif
+                else:
+                    if col == 0:
+                        cell = cell + (" " * diff) + self.delimiters_white_spaces * " "
 
-                # The left point and the right point for the current cell of
-                # the table
-                left_point = self.view.text_point(lines[j], prev_cols[j]+1)
-                right_point = self.view.text_point(lines[j], cols[j] + left_dif)
+                        if cell == " ":
+                            cell = ""
+                    else:
+                        cell = " " + cell + (" " * diff) + self.delimiters_white_spaces * " "
 
-                self.view.insert(edit, left_point,  " " * left_dif)
-                self.view.insert(edit, right_point, " " * right_dif)
+                lines[row][1][col] = cell
+
+        self.render_lines(edit, lines, separator, front_whites)

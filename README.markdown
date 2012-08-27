@@ -32,6 +32,12 @@ Go to your Sublime Text 2 `Packages` directory and clone the package repository 
 * Unzip the files and rename the folder to `Table Cleaner`
 * Copy the folder to your Sublime Text 2 `Packages` directory
 
+## Settings
+These settings can be found in Base File.sublime-settings
+- **table_cleaner_delimiters** - Delimiters between two cells of the table - default: **["|", "&"]**
+- **table_cleaner_align_to_middle** - Align the text of each cell to middle (if set to false, the text will be alligned to left) - default: **true**
+- **table_cleaner_delimiters_white_spaces** - The number of whitespaces between the text of a cell and the delimiters - default: **1**
+
 ## How it works
 Select the table you want to clean, and press *alt + ;* and the table gets cleaned instantly.
 
