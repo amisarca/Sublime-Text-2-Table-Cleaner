@@ -8,9 +8,12 @@ class TableCleanerCommand(sublime_plugin.TextCommand):
         self.get_settings()
 
         lines, separator = self.get_separator(self.selected_lines())
-        lines, front_whites = self.front_whitespaces(lines)
 
-        self.align(edit, lines, separator, front_whites)
+        # If no separator has been found, then do not perform any changes
+        if separator:
+            lines, front_whites = self.front_whitespaces(lines)
+
+            self.align(edit, lines, separator, front_whites)
 
     # Retrieve all the settings from the settings file and store them in
     # instance variables
