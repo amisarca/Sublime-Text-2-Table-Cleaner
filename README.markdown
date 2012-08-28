@@ -24,7 +24,7 @@ Alternatively, if you are a git user, you can install the package and keep up to
 
 Go to your Sublime Text 2 `Packages` directory and clone the package repository using the command below:
 
-    https://github.com/mishu91/Sublime-Text-2-Table-Cleaner "Table Cleaner"
+    git clone https://github.com/mishu91/Sublime-Text-2-Table-Cleaner "Table Cleaner"
 
 ### Download Manually
 
