@@ -34,6 +34,12 @@ Go to your Sublime Text 2 `Packages` directory and clone the package repository 
 * Unzip the files and rename the folder to `Table Cleaner`
 * Copy the folder to your Sublime Text 2 `Packages` directory
 
+## Table Import
+
+Align a table pasted from another source (e.g. a website).
+
+**Works only if "Indent using spaces" is NOT checked.**
+
 ## Settings
 These settings can be found in Base File.sublime-settings
 - **table_cleaner_delimiters** - Delimiters between two cells of the table - default: **["|", "&"]**
@@ -42,10 +48,12 @@ These settings can be found in Base File.sublime-settings
 
 ## How it works
 Select the table you want to clean, and press *alt + ;* and the table gets cleaned instantly.
+For cleaning a table pasted from another source press *alt + shift + ;" and the table gets cleaned instantly.
 
 ## Contributing
 Did you spot any bug or think of a great improvement? Create a new issue, or submit a pull request.
 
 # Changelog
+- 0.2.0 The tables can be alligned by multiple separators at the same time, and the separators can have more than one character; multiple selection works as well; added the table import feature
 - 0.1.0 Added better support for LaTex tables; added more settings to make it more configurable
 - 0.0.1 Initial release
